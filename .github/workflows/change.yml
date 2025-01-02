@@ -22,15 +22,12 @@ jobs:
         SERVICENOW_URL: ${{ secrets.SERVICENOW_URL }}
         SERVICENOW_USERNAME: ${{ secrets.SERVICENOW_USERNAME }}
         SERVICENOW_PASSWORD: ${{ secrets.SERVICENOW_PASSWORD }}
-        SYS_ID: "46cc713aa9fe1981008a95d213681c65" # Static SYS_ID
+        SYS_ID: ${{ github.event.inputs.sys_id }}
       run: |
-        API_URL="$https://dev181999.service-now.com/api/now/table/change_request?sys_id=${SYS_ID}"
-
         while true; do
-          echo "Querying ServiceNow API for change request state..."
+          API_URL="$SERVICENOW_URL/api/now/table/change_request?sys_id=$SYS_ID"
           RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
           STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
-          
           if [ "$STATE" == "-1" ]; then
             echo "Change request is in 'Implementation' state."
             break
