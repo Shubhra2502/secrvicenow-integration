@@ -25,34 +25,34 @@ jobs:
         SYS_ID: ${{ github.event.inputs.sys_id }}
       run: |
        while true; do
-  if [ -z "$SERVICENOW_URL" ] || [ -z "$SERVICENOW_USERNAME" ] || [ -z "$SERVICENOW_PASSWORD" ]; then
-    echo "Error: Missing required environment variables."
-    exit 3
-  fi
+        if [ -z "$SERVICENOW_URL" ] || [ -z "$SERVICENOW_USERNAME" ] || [ -z "$SERVICENOW_PASSWORD" ]; then
+         echo "Error: Missing required environment variables."
+          exit 3
+       fi
 
-  API_URL="$SERVICENOW_URL/api/now/table/change_request?sys_id=$SYS_ID"
-  RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
+       API_URL="$SERVICENOW_URL/api/now/table/change_request?sys_id=$SYS_ID"
+       RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
 
-  if [ -z "$RESPONSE" ]; then
+        if [ -z "$RESPONSE" ]; then
     echo "Error: No response from ServiceNow API."
-    exit 3
-  fi
+      exit 3
+      fi
 
-  if echo "$RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
+      if echo "$RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
     echo "Error from ServiceNow API: $(echo "$RESPONSE" | jq -r '.error.message')"
-    exit 3
-  fi
+      exit 3
+      fi
 
-  STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
-  if [ "$STATE" == "-1" ]; then
-    echo "Change request is in 'Implementation' state."
-    break
-  else
-    echo "Change request is not in 'Implementation' state. Current state: $STATE"
-    echo "Waiting for 60 seconds before checking again..."
-    sleep 60
-  fi
-done
+      STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
+      if [ "$STATE" == "-1" ]; then
+      echo "Change request is in 'Implementation' state."
+      break
+      else
+      echo "Change request is not in 'Implementation' state. Current state: $STATE"
+      echo "Waiting for 60 seconds before checking again..."
+      sleep 60
+    fi
+  done
 
     - name: Deploy Application
       if: steps.validate.outcome == 'success'
