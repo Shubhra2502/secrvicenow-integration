@@ -20,7 +20,7 @@ jobs:
     - name: Validate Change Request State
       run: |
         # Define the API endpoint
-        API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id="892eb11247810200e90d87e8dee4908f"
+        API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id=892eb11247810200e90d87e8dee4908f"
 
         # Make the API request to get the change request state
         RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
