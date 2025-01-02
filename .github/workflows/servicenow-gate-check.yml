@@ -21,7 +21,7 @@ jobs:
       run: |
         # Define the API endpoint
         SYS_ID="46cc713aa9fe1981008a95d213681c65"
-        API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id={SYS_ID}"
+        API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id=${SYS_ID}"
 
         # Make the API request to get the change request state
         RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
