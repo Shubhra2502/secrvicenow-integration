@@ -1,38 +1,47 @@
 name: ServiceNow Gate Check
 
 on:
-  workflow_dispatch: # Allows you to run the workflow manually
+  workflow_dispatch:  # This allows you to trigger the workflow manually.
 
 jobs:
   check-servicenow:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set environment variables
-      run: |
-        echo "SERVICENOW_USERNAME=${{ secrets.SERVICENOW_USERNAME }}" >> $GITHUB_ENV
-        echo "SERVICENOW_PASSWORD=${{ secrets.SERVICENOW_PASSWORD }}" >> $GITHUB_ENV
-        echo "CHANGE_SYS_ID=${{ secrets.CHANGE_SYS_ID }}" >> $GITHUB_ENV
+      - name: Set up environment variables
+        run: |
+          echo "SERVICENOW_USERNAME=${{ secrets.SERVICENOW_USERNAME }}" >> $GITHUB_ENV
+          echo "SERVICENOW_PASSWORD=${{ secrets.SERVICENOW_PASSWORD }}" >> $GITHUB_ENV
 
-    - name: Validate Change Request State
-      run: |
-        # Define the API endpoint
-        SYS_ID="46cc713aa9fe1981008a95d213681c65"
-        API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id=${SYS_ID}"
+      - name: Validate Change Request State
+        run: |
+          # Define the API endpoint
+          SYS_ID="46cc713aa9fe1981008a95d213681c65"
+          API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id=${SYS_ID}"
+          
+          # Make the API request to get the change request state
+          RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
 
-        # Make the API request to get the change request state
-        RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
-        
-        # Extract the change request state from the response
-        STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
+          # Print the response for debugging
+          echo "API Response: $RESPONSE"
 
-        # Check if the state is 'Implementation'
-        if [ "$STATE" != "Implement" ]; then
-          echo "Change request is not in 'Implementation' state. Current state: $STATE"
-          exit 1 # Fail the workflow if the state is not 'Implementation'
-        else
-          echo "Change request is in 'Implementation' state."
-        fi
+          # Check if the result array exists and is not empty
+          if echo "$RESPONSE" | jq -e '.result | length > 0'; then
+              STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
+              
+              # Check if the state is 'Implementation'
+              if [ "$STATE" != "Implementation" ]; then
+                  echo "Change request is not in 'Implementation' state. Current state: $STATE"
+                  exit 1 # Fail the workflow if the state is not 'Implementation'
+              else
+                  echo "Change request is in 'Implementation' state."
+              fi
+          else
+              echo "No change request found or API returned an empty result."
+              exit 1
+          fi
+        env:
+          SERVICENOW_USERNAME: ${{ secrets.SERVICENOW_USERNAME }}
+          SERVICENOW_PASSWORD: ${{ secrets.SERVICENOW_PASSWORD }}
