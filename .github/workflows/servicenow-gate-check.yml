@@ -32,7 +32,7 @@ jobs:
               STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
               
               # Check if the state is 'Implementation'
-              if [ "$STATE" != "Implementation" ]; then
+              if [ "$STATE" != "-1"]; then
                   echo "Change request is not in 'Implementation' state. Current state: $STATE"
                   exit 1 # Fail the workflow if the state is not 'Implementation'
               else
