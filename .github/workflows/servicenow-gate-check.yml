@@ -1,16 +1,37 @@
 name: ServiceNow Gate Check
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch: # Allows you to run the workflow manually
 
 jobs:
-  check-change-state:
+  check-servicenow:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Validate Change Request State
-        run: |
-          echo "This is where you would validate the change request state."
+    - name: Set environment variables
+      run: |
+        echo "SERVICENOW_USERNAME=${{ secrets.SERVICENOW_USERNAME }}" >> $GITHUB_ENV
+        echo "SERVICENOW_PASSWORD=${{ secrets.SERVICENOW_PASSWORD }}" >> $GITHUB_ENV
+        echo "CHANGE_SYS_ID=${{ secrets.CHANGE_SYS_ID }}" >> $GITHUB_ENV
+
+    - name: Validate Change Request State
+      run: |
+        # Define the API endpoint
+        API_URL="https://dev181999.service-now.com/api/now/table/change_request?sys_id=${892eb11247810200e90d87e8dee4908f}"
+
+        # Make the API request to get the change request state
+        RESPONSE=$(curl -s -u "${SERVICENOW_USERNAME}:${SERVICENOW_PASSWORD}" -H "Accept: application/json" "$API_URL")
+        
+        # Extract the change request state from the response
+        STATE=$(echo "$RESPONSE" | jq -r '.result[0].state')
+
+        # Check if the state is 'Implementation'
+        if [ "$STATE" != "Implement" ]; then
+          echo "Change request is not in 'Implementation' state. Current state: $STATE"
+          exit 1 # Fail the workflow if the state is not 'Implementation'
+        else
+          echo "Change request is in 'Implementation' state."
+        fi
