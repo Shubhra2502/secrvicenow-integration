@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>change_request</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition table="change_request">stateCHANGESTO-1^EQ<item display_value="Implement" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESTO" or="false" value="-1"/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter_condition>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>TriggerPipelineOnStateChange</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+    // Check if the change request state is "Implementation" (or your target state)
+    if (current.state == -1) { // Change this to match your implementation state value
+        // Create a new async business rule to handle the outbound HTTP request
+        var gr = new GlideRecord('change_request');
+        if (gr.get(current.sys_id)) {
+            // Call an async script include to perform the HTTP request
+            var asyncRequest = new sn_ws.RESTMessageV2();
+            var sysId = current.sys_id;
+            // Retrieve GitHub token securely from the credentials
+            var credGR = new GlideRecord('sys_credentials');
+            credGR.addQuery('name', 'Githubtoken'); // Use the name of your credential record
+            credGR.query();
+
+            var gitHubToken = '';
+            if (credGR.next()) {
+                gitHubToken = credGR.password; // Get the token securely stored in the credential record
+            } else {
+                gs.error("GitHub Token credential record not found.");
+                return; // Exit if the credential is not found
+            }
+
+            var payload = JSON.stringify({
+                event_type: "change_update",
+                client_payload: {
+                    sys_id: sysId,
+                    state: current.state
+                }
+            });
+
+            // Set up the request
+            asyncRequest.setEndpoint('https://api.github.com/repos/Shubhra2502/secrvicenow-integration/dispatches');
+            asyncRequest.setHttpMethod('POST');
+            asyncRequest.setRequestHeader('Authorization', 'Bearer ' + gitHubToken);
+            asyncRequest.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+            asyncRequest.setRequestBody(payload);
+
+            // Use the async option to execute the request
+            var asyncResponse = asyncRequest.executeAsync();
+            gs.info("GitHub API request sent asynchronously: " + asyncResponse);
+        }
+    } else {
+        gs.info("Change request state is not 'Implementation'. Current state: " + current.state);
+    }
+})(current, previous);
+]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-01-03 07:53:33</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>3cb1107a53ba125002df18b0a0490e47</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>TriggerPipelineOnStateChange</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Changemanagement Pipeline " source="x_1346349_changema">1222c8f2537a125002df18b0a0490ec9</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Changemanagement Pipeline ">1222c8f2537a125002df18b0a0490ec9</sys_scope>
+        <sys_update_name>sys_script_3cb1107a53ba125002df18b0a0490e47</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-01-03 15:32:28</sys_updated_on>
+        <template/>
+        <when>async_always</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=3cb1107a53ba125002df18b0a0490e47"/>
+    <sys_es_latest_script action="INSERT_OR_UPDATE">
+        <id>3cb1107a53ba125002df18b0a0490e47</id>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-01-03 07:57:58</sys_created_on>
+        <sys_id>9203907a53ba125002df18b0a0490e40</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-01-03 07:57:58</sys_updated_on>
+        <table>sys_script</table>
+        <use_es_latest>true</use_es_latest>
+    </sys_es_latest_script>
+</record_update>
