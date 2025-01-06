@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl>cf9d01d3e73003009d6247e603f6a990</enforce_acl>
+        <http_method>POST</http_method>
+        <name>TriggerPipeline</name>
+        <operation_script><![CDATA[(function process(request, response) {
+    var sysId = request.queryParams.sys_id; // Extract sys_id from query params
+    var changeGr = new GlideRecord('change_request');
+
+    if (changeGr.get(sysId)) {
+        // Prepare data for GitHub API
+        var payload = JSON.stringify({
+            event_type: "change_update",
+            client_payload: {
+                sys_id: sysId,
+                state: changeGr.state
+            }
+        });
+
+        // Call GitHub API
+        var r = new sn_ws.RESTMessageV2();
+        r.setEndpoint('https://api.github.com/repos/Shubhra25/secrvicenow-integration/dispatches');
+        r.setHttpMethod('POST');
+		r.setAuthentication('basic', 'Githubtoken');
+        r.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+        r.setRequestBody(payload);
+
+        var responseMsg = r.execute();
+        var httpResponse = responseMsg.getBody();
+
+        response.setStatus(200);
+        response.setBody({
+            message: "Triggered GitHub Workflow",
+            response: JSON.parse(httpResponse)
+        });
+    } else {
+        response.setStatus(404);
+        response.setBody({ error: "Change request not found" });
+    }
+})(request, response);
+]]></operation_script>
+        <operation_uri>/api/x_1346349_changema/pipelinetriggerapi/trigger</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/trigger</relative_path>
+        <request_example/>
+        <requires_acl_authorization>true</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <requires_snc_internal_role>true</requires_snc_internal_role>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-01-03 06:54:34</sys_created_on>
+        <sys_id>ac14c4f6537a125002df18b0a0490ef1</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>TriggerPipeline</sys_name>
+        <sys_package display_value="Changemanagement Pipeline " source="x_1346349_changema">1222c8f2537a125002df18b0a0490ec9</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Changemanagement Pipeline ">1222c8f2537a125002df18b0a0490ec9</sys_scope>
+        <sys_update_name>sys_ws_operation_ac14c4f6537a125002df18b0a0490ef1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-01-03 15:32:55</sys_updated_on>
+        <web_service_definition display_value="PipelineTriggerAPI">8dc3c8f2537a125002df18b0a0490e65</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+    <sys_es_latest_script action="INSERT_OR_UPDATE">
+        <id>ac14c4f6537a125002df18b0a0490ef1</id>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-01-03 06:54:34</sys_created_on>
+        <sys_id>698444f6537a125002df18b0a0490eb7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-01-03 06:54:34</sys_updated_on>
+        <table>sys_ws_operation</table>
+        <use_es_latest>true</use_es_latest>
+    </sys_es_latest_script>
+</record_update>
