@@ -34,28 +34,18 @@
     if (current.state == -1) { // Change this to match your implementation state value
         // Create a new async business rule to handle the outbound HTTP request
         var gr = new GlideRecord('change_request');
+		gs.info("Change");
         if (gr.get(current.sys_id)) {
             // Call an async script include to perform the HTTP request
             var asyncRequest = new sn_ws.RESTMessageV2();
             var sysId = current.sys_id;
-            // Retrieve GitHub token securely from the credentials
-            var credGR = new GlideRecord('sys_credentials');
-            credGR.addQuery('name', 'Githubtoken'); // Use the name of your credential record
-            credGR.query();
-
-            var gitHubToken = '';
-            if (credGR.next()) {
-                gitHubToken = credGR.password; // Get the token securely stored in the credential record
-            } else {
-                gs.error("GitHub Token credential record not found.");
-                return; // Exit if the credential is not found
-            }
-
+            var gitHubToken = "Githubtoken"; // Store token securely
             var payload = JSON.stringify({
                 event_type: "change_update",
                 client_payload: {
                     sys_id: sysId,
                     state: current.state
+			
                 }
             });
 
@@ -73,15 +63,14 @@
     } else {
         gs.info("Change request state is not 'Implementation'. Current state: " + current.state);
     }
-})(current, previous);
-]]></script>
+})(current, previous); ]]></script>
         <sys_class_name>sys_script</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-01-03 07:53:33</sys_created_on>
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>3cb1107a53ba125002df18b0a0490e47</sys_id>
-        <sys_mod_count>7</sys_mod_count>
+        <sys_mod_count>20</sys_mod_count>
         <sys_name>TriggerPipelineOnStateChange</sys_name>
         <sys_overrides/>
         <sys_package display_value="Changemanagement Pipeline " source="x_1346349_changema">1222c8f2537a125002df18b0a0490ec9</sys_package>
@@ -89,9 +78,9 @@
         <sys_scope display_value="Changemanagement Pipeline ">1222c8f2537a125002df18b0a0490ec9</sys_scope>
         <sys_update_name>sys_script_3cb1107a53ba125002df18b0a0490e47</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-01-03 15:32:28</sys_updated_on>
+        <sys_updated_on>2025-01-06 06:49:35</sys_updated_on>
         <template/>
-        <when>async_always</when>
+        <when>after</when>
     </sys_script>
     <sys_translated_text action="delete_multiple" query="documentkey=3cb1107a53ba125002df18b0a0490e47"/>
     <sys_es_latest_script action="INSERT_OR_UPDATE">
