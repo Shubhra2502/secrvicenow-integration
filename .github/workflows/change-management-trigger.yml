@@ -1,31 +1,30 @@
-    name: Change Management Trigger
-    
-    on:
-      repository_dispatch:
-        types: [change_update]
-    
-    jobs:
-      update:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout Repository
-            uses: actions/checkout@v3
-    
-          - name: Execute Task
-            run: echo "Triggered by ServiceNow change request."
-          - name: Update Change Request File
-            run: |
-              # Create or update the change_updates.txt file with the change request details
-              echo "Change Request ID: ${{github.event.client_payload.sys_id }}" >> change_updates.txt
-              echo "New State: ${{github.event.client_payload.state }}" >> change_updates.txt
-              echo "Updated on: $(date)" >> change_updates.txt
-              echo "--------------------------" >> change_updates.txt  # Add a separator for clarity
-    
-          - name: Commit Changes
-            run: |
-               git config --local user.name "Shubhra2502"  # Replace with your GitHub username
-               git config --local user.email "shubhrasaxena25@gmail.com"  # Replace with your GitHub email
-               git add change_updates.txt
-               git add change_updates.txt
-               git commit -m "Update Change Request: ${{github.event.client_payload.sys_id }} to state: ${{github.event.client_payload.state }}"
-               git push origin main  # Replace 'main' with your default branch if necessary
+name: Change Management Trigger
+
+on:
+  repository_dispatch:
+    types: [change_update]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Update Change Request File
+        run: |
+          # Create or update the change_updates.txt file with the change request details
+          echo "Change Request ID: ${{github.event.client_payload.sys_id }}" >> change_updates.txt
+          echo "New State: ${{github.event.client_payload.state }}" >> change_updates.txt
+          echo "Updated on: $(date)" >> change_updates.txt
+          echo "--------------------------" >> change_updates.txt  # Add a separator for clarity
+
+      - name: Commit Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the automatically generated GitHub token
+        run: |
+          git config --local user.name "GitHub Actions"  # Using a generic name for actions
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"  # Use a bot email
+          git add change_updates.txt
+          git commit -m "Update Change Request: ${{github.event.client_payload.sys_id }} to state: ${{github.event.client_payload.state }}"
+          git push origin main  # Replace 'main' with your default branch if necessary
