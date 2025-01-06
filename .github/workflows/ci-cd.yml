@@ -11,5 +11,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Check Change Request State
+        id: check_state
+        run: |
+          echo "Received payload:"
+          echo "Sys ID: ${{github.event.client_payload.sys_id }}"
+          echo "State: ${{github.event.client_payload.state }}"
+
+          # Check if the state is 'Implementation' (assuming -1 corresponds to 'Implementation')
+          if [[ "${{github.event.client_payload.state }}" == "-1" ]]; then
+            echo "The change request state is Implementation."
+          else
+            echo "The change request state is not Implementation."
+            exit 0  # Exit if it's not the state you're interested in
+          fi
+
       - name: Execute Task
         run: echo "Triggered by ServiceNow change request."
