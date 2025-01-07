@@ -38,6 +38,7 @@
         if (gr.get(current.sys_id)) {
             // Call an async script include to perform the HTTP request
             var asyncRequest = new sn_ws.RESTMessageV2();
+			gs.info("Received");
             var sysId = current.sys_id;
             var gitHubToken = "Githubtoken"; // Store token securely
             var payload = JSON.stringify({
@@ -45,7 +46,6 @@
                 client_payload: {
                     sys_id: sysId,
                     state: current.state
-			
                 }
             });
 
@@ -59,6 +59,8 @@
             // Use the async option to execute the request
             var asyncResponse = asyncRequest.executeAsync();
             gs.info("GitHub API request sent asynchronously: " + asyncResponse);
+			gs.info("GitHub API Response Status: " + asyncResponse.getStatusCode());
+            gs.info("GitHub API Response Body: " + asyncResponse.getBody());
         }
     } else {
         gs.info("Change request state is not 'Implementation'. Current state: " + current.state);
@@ -70,7 +72,7 @@
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>3cb1107a53ba125002df18b0a0490e47</sys_id>
-        <sys_mod_count>20</sys_mod_count>
+        <sys_mod_count>26</sys_mod_count>
         <sys_name>TriggerPipelineOnStateChange</sys_name>
         <sys_overrides/>
         <sys_package display_value="Changemanagement Pipeline " source="x_1346349_changema">1222c8f2537a125002df18b0a0490ec9</sys_package>
@@ -78,9 +80,9 @@
         <sys_scope display_value="Changemanagement Pipeline ">1222c8f2537a125002df18b0a0490ec9</sys_scope>
         <sys_update_name>sys_script_3cb1107a53ba125002df18b0a0490e47</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-01-06 06:49:35</sys_updated_on>
+        <sys_updated_on>2025-01-06 07:28:07</sys_updated_on>
         <template/>
-        <when>after</when>
+        <when>async_always</when>
     </sys_script>
     <sys_translated_text action="delete_multiple" query="documentkey=3cb1107a53ba125002df18b0a0490e47"/>
     <sys_es_latest_script action="INSERT_OR_UPDATE">
